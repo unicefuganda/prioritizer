@@ -7,9 +7,11 @@ import requests
 
 class TestSMSCRouter(TestCase):
 
-    def setUp(self):
+    @patch('logging.Logger')
+    def setUp(self, mock_logger):
+
         self.app_config = self.get_app_config()
-        self.smsc_router = SMSCRouter(self.app_config)
+        self.smsc_router = SMSCRouter(self.app_config, mock_logger)
 
     def test_that_for_message_with_low_priority_the_low_priority_smsc_id_is_used(self):
         url = self.smsc_router.generate_url("message", "111111,222222", Priority.LOW)

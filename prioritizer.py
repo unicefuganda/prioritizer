@@ -6,6 +6,9 @@ from models.blacklist_cache import BlacklistCache
 from models.caching_steps import StepsCache
 from models.priority import Priority
 from models.registration_message_filter import RegistrationMessageFilter
+import logging
+from logging.handlers import RotatingFileHandler
+
 
 app = Flask(__name__)
 app.config.from_object('settings')
@@ -44,7 +47,7 @@ def outgoing_message_router():
     filters = [message_filter, receiver_count_filter]
     priority = execute_filters(filters)
 
-    smsc_router = SMSCRouter(app.config)
+    smsc_router = SMSCRouter(app.config, app.logger)
     smsc_router.route(request.args, priority)
 
     return "Done"
@@ -68,7 +71,17 @@ def add_to_blacklist():
     else:
         return "None text found"
 
+def add_logger():
+    log_file = app.config.get("LOGGING_FILE", "prioritizer.log")
+    handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=10)
+    handler.setLevel(logging.INFO)
+    app.logger.addHandler(handler)
+
+    app.logger.info('info')
+    app.logger.info(type(app.logger))
+
 if __name__ == "__main__":
-    host = app.config.get("APPLICATION_HOST","127.0.0.1")
-    port = int(app.config.get("APPLICATION_PORT", "5000"))
+    add_logger()
+    host = app.config.get("APPLICATION_HOST", "127.0.0.1")
+    port = app.config.get("APPLICATION_PORT", 5000)
     app.run(host=host, port=port)

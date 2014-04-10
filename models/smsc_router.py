@@ -4,8 +4,9 @@ import requests
 
 class SMSCRouter(object):
 
-    def __init__(self, app_config):
+    def __init__(self, app_config, logger):
         self.app_config = app_config
+        self.logger = logger
 
     def format_receivers_for_kannel(self, request_args):
         return request_args.replace(",", "+")
@@ -17,8 +18,9 @@ class SMSCRouter(object):
     def make_http_request(self, url):
         try:
             response = requests.get(url)
+            self.logger.info('Successful request %s', url)
         except requests.RequestException, e:
-            # TODO: log the exception
+            self.logger.error(e)
             pass
 
     def get_kannel_smsc_id(self, priority):
