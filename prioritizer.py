@@ -69,6 +69,6 @@ def add_to_blacklist():
         return "None text found"
 
 if __name__ == "__main__":
-    host = getattr(app.config,"APPLICATION_HOST","127.0.0.1")
-    port = int(getattr(app.config, "APPLICATION_PORT", "5000"))
+    host = app.config.get("APPLICATION_HOST","127.0.0.1")
+    port = int(app.config.get("APPLICATION_PORT", "5000"))
     app.run(host=host, port=port)
