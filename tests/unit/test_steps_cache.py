@@ -13,9 +13,10 @@ def encode_mock(encode_values):
 
 class TestStepsCache(TestCase):
 
-    def setUp(self):
+    @patch('logging.Logger')
+    def setUp(self, mock_logger):
         self.client = mock_strict_redis_client()
-        self.cache = StepsCache(self.client, "username", "password", "http://random/url", "ureport-registration-steps")
+        self.cache = StepsCache(self.client, mock_logger, "username", "password", "http://random/url", "ureport-registration-steps")
 
     @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_that_data_from_api_is_stored(self):
@@ -85,3 +86,10 @@ class TestStepsCache(TestCase):
         self.cache.get_authorized_response = Mock(return_value=response_mock)
 
         self.assertListEqual(self.cache.get_steps_information(), ["step 1", "step 2"])
+
+    def test_fails_when_no_step_key_found_from_api_data(self):
+        json_response = json.dumps({"different_key": ["step 1", "step 2"]})
+        response_mock = Mock()
+        response_mock.read = Mock(return_value=json_response)
+        self.cache.get_authorized_response = Mock(return_value=response_mock)
+        self.assertRaises(Exception, self.cache.get_steps_information())

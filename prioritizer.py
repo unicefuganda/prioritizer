@@ -25,6 +25,7 @@ def get_redis_client():
 
 def get_steps_cache_instance():
     steps_cache = StepsCache(get_redis_client(),
+                             app.logger,
                              app.config["REGISTRATION_STEPS_API_USERNAME"],
                              app.config["REGISTRATION_STEPS_API_PASSWORD"],
                              app.config["REGISTRATION_STEPS_API_URL"],

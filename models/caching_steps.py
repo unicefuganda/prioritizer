@@ -1,13 +1,13 @@
 from flask import json
-import hashlib
 import urllib2, base64
 from models.encoder import Encoder
 
 
 class StepsCache:
 
-    def __init__(self, client, username, password, url, cache_key_name):
+    def __init__(self, client, logger, username, password, url, cache_key_name):
         self.client = client
+        self.logger = logger
         self.username = username
         self.password = password
         self.url = url
@@ -23,10 +23,13 @@ class StepsCache:
             self.client.sadd(self.get_key_name(), self.encoder.encode(value))
 
     def get_steps_information(self):
-        response = self.get_authorized_response(self.url)
-
-        data = json.loads(response.read())
-        return data["steps"]
+        try:
+            response = self.get_authorized_response(self.url)
+            data = json.loads(response.read())
+            return data["steps"]
+        except Exception, e:
+            self.logger.error("Error when getting registration steps data %s", e)
+            return []
 
     def delete_script_steps_data(self):
         self.client.delete(self.get_key_name())
