@@ -1,4 +1,7 @@
 from flask import Flask, request
+from models.blacklist_filter import BlacklistFilter
+from models.encoder import Encoder
+from models.prioritylist import Blacklist
 from models.receiver_count_filter import ReceiverCountFilter
 from models.smsc_router import SMSCRouter
 import redis
@@ -15,6 +18,7 @@ app.config.from_object('settings')
 
 app.config["DEBUG"] = True
 
+
 def get_redis_client():
     return redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -28,8 +32,12 @@ def get_steps_cache_instance():
     return steps_cache
 
 
-def execute_filters(filters):
-    for priority_filter in filters:
+def execute_filters(high_filters, low_filters):
+    for priority_filter in low_filters:
+        if priority_filter.prioritize() == Priority.LOW:
+            return Priority.LOW
+
+    for priority_filter in high_filters:
         if priority_filter.prioritize() == Priority.HIGH:
             return Priority.HIGH
 
@@ -38,19 +46,25 @@ def execute_filters(filters):
 
 @app.route("/router", methods=['GET'])
 def outgoing_message_router():
-    message_filter = RegistrationMessageFilter(get_steps_cache_instance(),
-                                               request.args.get('text', None))
+    message = request.args.get('text', None)
+    receivers = request.args.get('to', '')
 
-    receivers = request.args.get('to','')
+    message_filter = RegistrationMessageFilter(get_steps_cache_instance(), message)
     receiver_count_filter = ReceiverCountFilter(receivers.split(","), 1)
 
-    filters = [message_filter, receiver_count_filter]
-    priority = execute_filters(filters)
+    blacklist = Blacklist(get_redis_client(), Encoder())
+    blacklist_filter = BlacklistFilter(blacklist, message)
+
+    high_filters = [message_filter, receiver_count_filter]
+    low_filters = [blacklist_filter]
+
+    priority = execute_filters(high_filters, low_filters)
 
     smsc_router = SMSCRouter(app.config, app.logger)
     smsc_router.route(request.args, priority)
 
     return "Done"
+
 
 @app.route("/update_script_steps")
 def update_script_steps():
@@ -71,6 +85,7 @@ def add_to_blacklist():
     else:
         return "None text found"
 
+
 def add_logger():
     log_file = app.config.get("LOGGING_FILE", "prioritizer.log")
     handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=10)
@@ -79,6 +94,7 @@ def add_logger():
 
     app.logger.info('info')
     app.logger.info(type(app.logger))
+
 
 if __name__ == "__main__":
     add_logger()

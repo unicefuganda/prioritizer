@@ -134,6 +134,20 @@ class TestBlacklist(TestCase):
 
         self.assertFalse(self.blacklist.contains_contact("sample 3"))
 
+    def test_that_a_text_set_can_be_deleted(self):
+        self.blacklist.poll_text(231, "sample 1")
+        self.assertTrue(self.blacklist.set_key_exists(231, ContentTypes.TEXT))
+
+        self.blacklist.delete_poll_text_set(231)
+        self.assertFalse(self.blacklist.set_key_exists(231, ContentTypes.TEXT))
+
+    def test_that_a_contacts_set_can_be_deleted(self):
+        self.blacklist.poll_contacts(231, "1111111")
+        self.assertTrue(self.blacklist.set_key_exists(231, ContentTypes.CONTACTS))
+
+        self.blacklist.delete_poll_contacts_set(231)
+        self.assertFalse(self.blacklist.set_key_exists(231, ContentTypes.CONTACTS))
+
     def test_that_add_expire_method_gets_called_with_key_name(self):
         self.blacklist.add_expire = Mock()
         self.blacklist.poll_text(231, "sample 1")

@@ -37,6 +37,14 @@ class PriorityListFoundation():
         contents = self.filter_contents(content_type, contents)
         self.redis_client.srem(key_name, *contents)
 
+    def set_key_exists(self, poll_id, content_type):
+        key_name = self.get_key_name(poll_id, content_type)
+        return self.redis_client.exists(key_name)
+
+    def delete_set(self, poll_id, content_type):
+        key_name = self.get_key_name(poll_id, content_type)
+        self.redis_client.delete(key_name)
+
     def add(self, poll_id, content_type, contents):
         contents = self.get_content_array(contents)
         key_name = self.get_key_name(poll_id, content_type)
@@ -98,6 +106,12 @@ class PriorityList(PriorityListFoundation):
 
     def delete_poll_contacts(self, poll_id, contacts):
         self.delete(poll_id, ContentTypes.CONTACTS, contacts)
+
+    def delete_poll_text_set(self, poll_id):
+        self.delete_set(poll_id, ContentTypes.TEXT)
+
+    def delete_poll_contacts_set(self, poll_id):
+        self.delete_set(poll_id, ContentTypes.CONTACTS)
 
     def get_poll_contact_keys(self):
         return self.get_poll_keys(ContentTypes.CONTACTS)
