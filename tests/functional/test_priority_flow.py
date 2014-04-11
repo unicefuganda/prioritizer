@@ -10,3 +10,6 @@ class TestStepsCache(PriorityTestCase):
     def test_that_a_message_with_single_recipient_gets_prioritized_as_high_priority(self):
         self.assert_high_priority(self.get_url("http://%s/router?text=Hi&to=256704000000"))
 
+    def test_that_a_none_registration_message_with_two_recipients_gets_low_priority(self):
+        self.assert_low_priority(self.get_url("http://%s/router?text=Hi&to=256704000000,256704000001"))
+
