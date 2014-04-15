@@ -5,7 +5,6 @@ from models.prioritylist import Blacklist
 from models.receiver_count_filter import ReceiverCountFilter
 from models.smsc_router import SMSCRouter
 import redis
-from models.blacklist_cache import BlacklistCache
 from models.caching_steps import StepsCache
 from models.priority import Priority
 from models.registration_message_filter import RegistrationMessageFilter
@@ -18,9 +17,11 @@ app.config.from_object('settings')
 
 app.config["DEBUG"] = True
 
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+
 
 def get_redis_client():
-    return redis.StrictRedis(host='localhost', port=6379, db=0)
+    return redis_client
 
 
 def get_steps_cache_instance():
@@ -75,16 +76,28 @@ def update_script_steps():
     return "Steps script in cache successfully updated"
 
 
-@app.route("/add_to_blacklist", methods=['POST'])
-def add_to_blacklist():
-    "curl -i -X POST -d 'text=example_text' http://127.0.0.1:5000/add_to_blacklist"
-    if request.form['text']:
-        client = get_redis_client()
-        blacklist_cache = BlacklistCache(client)
-        blacklist_cache.add_to_blacklist(request.form['text'])
-        return "Successfully added to blacklist"
-    else:
-        return "None text found"
+blacklist = Blacklist(get_redis_client(), Encoder())
+
+
+@app.route("/blacklist/add", methods=['POST'])
+def add_poll_to_blacklist():
+    blacklist.poll_text(request.form["poll_id"], request.form["poll_text"])
+    blacklist.poll_text(request.form["poll_id"], request.form["poll_response"])
+    return "Done"
+
+
+@app.route("/blacklist/delete", methods=['POST'])
+def delete_poll_from_blacklist():
+    blacklist.delete_poll_text(request.form["poll_id"], request.form["poll_text"])
+    blacklist.delete_poll_text(request.form["poll_id"], request.form["poll_response"])
+    return "Done"
+
+
+@app.route("/blacklist/contacts", methods=['POST'])
+def add_poll_contacts_to_blacklist():
+    poll_id = int(request.args.get("poll_id"))
+    blacklist.poll_contacts(poll_id, request.get_json(True))
+    return "Done"
 
 
 def add_logger():
