@@ -1,7 +1,7 @@
 from models.priority import Priority
 
 
-class BlacklistFilter():
+class BlacklistFilter(object):
 
     def __init__(self, blacklist, message):
         self.blacklist = blacklist

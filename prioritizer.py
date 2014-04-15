@@ -1,6 +1,7 @@
 from flask import Flask, request
 from models.blacklist_filter import BlacklistFilter
 from models.encoder import Encoder
+from models.filter_processor import FilterProcessor
 from models.prioritylist import Blacklist
 from models.receiver_count_filter import ReceiverCountFilter
 from models.smsc_router import SMSCRouter
@@ -34,18 +35,6 @@ def get_steps_cache_instance():
     return steps_cache
 
 
-def execute_filters(high_filters, low_filters):
-    for priority_filter in low_filters:
-        if priority_filter.prioritize() == Priority.LOW:
-            return Priority.LOW
-
-    for priority_filter in high_filters:
-        if priority_filter.prioritize() == Priority.HIGH:
-            return Priority.HIGH
-
-    return Priority.LOW
-
-
 @app.route("/router", methods=['GET'])
 def outgoing_message_router():
     message = request.args.get('text', None)
@@ -60,7 +49,8 @@ def outgoing_message_router():
     high_filters = [message_filter, receiver_count_filter]
     low_filters = [blacklist_filter]
 
-    priority = execute_filters(high_filters, low_filters)
+    processor = FilterProcessor(high_filters, low_filters)
+    priority = processor.execute()
 
     smsc_router = SMSCRouter(app.config, app.logger)
     smsc_router.route(request.args, priority)

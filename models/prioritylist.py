@@ -1,10 +1,10 @@
 
-class ContentTypes():
+class ContentTypes(object):
     TEXT = "text"
     CONTACTS = "contacts"
 
 
-class PriorityListFoundation():
+class PriorityListFoundation(object):
 
     POLL_TEXT_KEY = "%s:poll_texts:%s"
     POLL_CONTACTS_KEY = "%s:poll_contacts:%s"

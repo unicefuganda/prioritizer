@@ -1,7 +1,7 @@
 from models.priority import Priority
 
 
-class RegistrationMessageFilter():
+class RegistrationMessageFilter(object):
 
     def __init__(self, steps_cache, text):
         self.text = text

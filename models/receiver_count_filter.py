@@ -1,7 +1,7 @@
 from models.priority import Priority
 
 
-class ReceiverCountFilter():
+class ReceiverCountFilter(object):
 
     def __init__(self, receivers, max_receiver_count=1):
         self.receivers = receivers
