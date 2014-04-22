@@ -20,7 +20,7 @@ class TestStepsCache(PriorityTestCase):
         self.assert_high_priority(self.get_url("http://%s/router?text=Hi&to=256704000000"))
 
     def test_that_a_none_registration_message_with_two_recipients_gets_low_priority(self):
-        self.assert_low_priority(self.get_url("http://%s/router?text=Hi&to=256704000000,256704000001"))
+        self.assert_low_priority(self.get_url("http://%s/router?text=Hi&to=256704000000+256704000001"))
 
     def test_that_a_blacklisted_message_to_one_person_gets_low_priority(self):
         self.blacklist.poll_text(231, "Blacklisted message")

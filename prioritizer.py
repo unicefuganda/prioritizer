@@ -41,7 +41,7 @@ def outgoing_message_router():
     receivers = request.args.get('to', '')
 
     message_filter = RegistrationMessageFilter(get_steps_cache_instance(), message)
-    receiver_count_filter = ReceiverCountFilter(receivers.split(","), 1)
+    receiver_count_filter = ReceiverCountFilter(receivers.split("+"), 1)
 
     blacklist = Blacklist(get_redis_client(), Encoder())
     blacklist_filter = BlacklistFilter(blacklist, message)
