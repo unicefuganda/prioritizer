@@ -1,4 +1,4 @@
-from unittest import TestCase
+﻿from unittest import TestCase
 from mock import patch, Mock
 from models.encoder import Encoder
 
@@ -11,7 +11,7 @@ def md5_mock(args):
 class TestEncoder(TestCase):
     @patch('hashlib.md5', md5_mock)
     def test_that_encode_text_using_md5(self):
-        text = "important text"
+        text = u"why dòn't ìnsért sòme strànge chàrs? ù.ù"
         encoder = Encoder()
         encoded_text = encoder.encode(text)
         self.assertEquals(encoded_text, 'encrypted_value')
