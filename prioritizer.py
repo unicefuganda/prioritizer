@@ -7,7 +7,6 @@ from models.receiver_count_filter import ReceiverCountFilter
 from models.smsc_router import SMSCRouter
 import redis
 from models.caching_steps import StepsCache
-from models.priority import Priority
 from models.registration_message_filter import RegistrationMessageFilter
 import logging
 from logging.handlers import RotatingFileHandler
