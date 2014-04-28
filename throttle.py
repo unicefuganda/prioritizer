@@ -1,7 +1,13 @@
 from logging.handlers import RotatingFileHandler
 from flask import Flask, request
 import logging
+from models.encoder import Encoder
+from models.filter_processor import FilterProcessor
+from models.keyword_filter import KeywordFilter
+from models.priority import Priority
+from models.prioritylist import Whitelist
 from models.throttle_client import ThrottleClient
+from models.whitelist_contact_filter import WhitelistContactFilter
 import redis
 
 app = Flask(__name__)
@@ -15,11 +21,39 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 def get_redis_client():
     return redis_client
 
+
+def process_request(app_config, query_string, priority):
+    throttle_client = ThrottleClient(app_config, query_string)
+
+    if priority is Priority.HIGH:
+        throttle_client.submit_high_priority_job()
+
+    elif priority is Priority.LOW:
+        throttle_client.submit_low_priority_job()
+
+    else:
+        throttle_client.submit_normal_priority_job()
+
+
 @app.route("/receive", methods=['GET'])
 def throttle_incoming():
-    throttle_client = ThrottleClient(app.config,request.query_string)
-    throttle_client.submit_normal_priority_job()
+    whitelist = Whitelist(get_redis_client(), Encoder())
+    contact = request.args.get('sender')
+    keyword = request.args.get('keyword')
+
+    keyword_filter = KeywordFilter(whitelist, keyword, contact)
+    contact_filter = WhitelistContactFilter(whitelist, contact)
+
+    high_filters = [keyword_filter, contact_filter]
+
+    processor = FilterProcessor(high_filters, [])
+    priority = processor.execute()
+
+    # print "Priority: [%s]" % priority
+    process_request(app.config, request.query_string, priority)
+
     return "Done"
+
 
 def add_logger():
     log_file = app.config.get("LOGGING_FILE", "throttle.log")
