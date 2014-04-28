@@ -22,7 +22,7 @@ class TestThrottleClient(TestCase):
     @patch("gearman.GearmanClient.submit_job")
     def test_that_a_normal_priority_job_can_be_submitted(self, mocked_submit_job):
         self.client.submit_normal_priority_job()
-        mocked_submit_job.assert_called_with("call_router_receive", self.query_str, background=True)
+        mocked_submit_job.assert_called_with("call_router_receive", self.query_str, priority=None, background=True)
 
 
     def get_app_config(self):
