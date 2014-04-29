@@ -24,6 +24,11 @@ class TestThrottleWorker(TestCase):
         worker = ThrottleWorker(self.get_app_config())
         mocked_register_task.assert_called_with("call_router_receive", worker.call_router_receive)
 
+    @patch("gearman.GearmanWorker.set_client_id")
+    def test_that_on_initiation_client_id_is_set_for_the_worker(self, mocked_set_client_id):
+        worker = ThrottleWorker(self.get_app_config(), "sample-worker")
+        mocked_set_client_id.assert_called_with("sample-worker")
+
     @patch("gearman.GearmanWorker.work")
     def test_that_calling_start_method_on_throttle_work_puts_the_gearman_worker_to_work(self, mocked_work):
         worker = ThrottleWorker(self.get_app_config())

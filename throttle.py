@@ -23,7 +23,7 @@ def get_redis_client():
 
 
 def process_request(app_config, query_string, priority):
-    throttle_client = ThrottleClient(app_config, query_string)
+    throttle_client = ThrottleClient(app_config, query_string, app.logger)
 
     if priority is Priority.HIGH:
         throttle_client.submit_high_priority_job()

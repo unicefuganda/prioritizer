@@ -24,7 +24,6 @@ class TestThrottleClient(TestCase):
         self.client.submit_normal_priority_job()
         mocked_submit_job.assert_called_with("call_router_receive", self.query_str, priority=None, background=True)
 
-
     def get_app_config(self):
         config = {  "GEARMAN_SERVER": "0.0.0.0:4730",
                     "ROUTER_RECEIVE_TASK_NAME": "call_router_receive",
