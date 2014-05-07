@@ -53,7 +53,11 @@ class PriorityListFoundation(object):
         self.add_expire(key_name)
 
     def add_expire(self, key):
-        if self.redis_client.ttl(key) is None:
+        """ MockRedis returns None and StrictRedis returns -1
+            when the ttl does not exist hence the less than (<)
+            comparison to match both None and -1
+        """
+        if self.redis_client.ttl(key) < 0:
             self.redis_client.expire(key, self.KEY_EXPIRE_TIME)
 
     def get_poll_keys(self, content_type):
