@@ -3,6 +3,7 @@ from mock import Mock, patch
 from models.priority import Priority
 from models.smsc_router import SMSCRouter
 import requests
+import urlparse
 
 
 class TestSMSCRouter(TestCase):
@@ -51,6 +52,21 @@ class TestSMSCRouter(TestCase):
         self.smsc_router.generate_url = Mock()
         self.smsc_router.route(self.get_request_args(), Priority.HIGH)
         self.smsc_router.generate_url.assert_called_with("any message", "111111+222222+3333333", Priority.HIGH)
+
+    @patch('urllib.quote_plus')
+    def test_that_generate_url_encode_utf8_message_text(self, quote_plus_mock):
+        message = Mock(return_value="text message")
+        receivers = Mock(return_value="111111+222222+3333333")
+        message.encode = Mock(return_value="encoded_message")
+        receivers.encode = Mock(return_value="encoded_receivers")
+        quote_plus_mock.side_effect = ["quoted_encoded_message", "quoted_encoded_receivers"]
+        url = self.smsc_router.generate_url(message, receivers, Priority.HIGH)
+        parsed = urlparse.urlparse(url)
+
+        message.encode.assert_called_once_with("UTF-8")
+        receivers.encode.assert_called_once_with("UTF-8")
+        self.assertEquals(urlparse.parse_qs(parsed.query)['text'], ["quoted_encoded_message"])
+        self.assertEquals(urlparse.parse_qs(parsed.query)['to'], ["quoted_encoded_receivers"])
 
     def get_app_config(self):
         config = {  "KANNEL_LOW_PRIORITY_SMSC": "1111",

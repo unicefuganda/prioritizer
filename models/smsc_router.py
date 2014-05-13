@@ -1,5 +1,6 @@
 from models.priority import Priority
 import requests
+import urllib
 
 
 class SMSCRouter(object):
@@ -30,6 +31,9 @@ class SMSCRouter(object):
             smsc_id = self.app_config["KANNEL_LOW_PRIORITY_SMSC"]
         return smsc_id
 
+    def format(self, text):
+        return urllib.quote_plus(str(text.encode('UTF-8')))
+
     def generate_url(self, message, receivers, priority):
         smsc_id = self.get_kannel_smsc_id(priority)
 
@@ -38,7 +42,7 @@ class SMSCRouter(object):
                 "from": self.app_config["KANNEL_SEND_SMS_FROM"],
                 "username": self.app_config["KANNEL_SEND_SMS_USERNAME"],
                 "password": self.app_config["KANNEL_SEND_SMS_PASSWORD"],
-                "text": message,
-                "receivers": receivers,
+                "text": self.format(message),
+                "receivers": self.format(receivers),
                 "smsc": smsc_id
                 }
