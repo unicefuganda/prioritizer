@@ -11,5 +11,5 @@ class KeywordFilter(object):
         self.contact = contact
 
     def prioritize(self):
-        if self.keyword in self.VALID_KEYWORDS:
+        if self.keyword.lower() in self.VALID_KEYWORDS:
             self.whitelist.poll_contacts(self.ID, self.contact)

@@ -19,6 +19,12 @@ class TestKeywordFilter(TestCase):
         mocked_poll_contacts.assert_called_with("keyword_filter", "0773267474")
 
     @patch("models.prioritylist.Whitelist.poll_contacts")
+    def test_that_a_request_with_keyword_JOIN_is_case_insensitive(self, mocked_poll_contacts):
+        keyword_filter = KeywordFilter(self.whitelist, "JOIN", "0773267474")
+        keyword_filter.prioritize()
+        mocked_poll_contacts.assert_called_with("keyword_filter", "0773267474")
+
+    @patch("models.prioritylist.Whitelist.poll_contacts")
     def test_that_only_contact_with_allowed_keyword_gets_white_listed(self, mocked_poll_contacts):
         keyword_filter = KeywordFilter(self.whitelist, "invalid_keyword", "0773267474")
         keyword_filter.prioritize()

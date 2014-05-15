@@ -1,3 +1,4 @@
+import logging
 from unittest import TestCase
 from mock import patch, Mock
 from models.throttle_worker import ThrottleWorker
@@ -34,6 +35,18 @@ class TestThrottleWorker(TestCase):
         worker = ThrottleWorker(self.get_app_config())
         worker.start()
         mocked_work.assert_called_with()
+
+    @patch("models.throttle_worker.ThrottleWorker.log_info")
+    @patch("requests.get")
+    def test_that_logging_gets_called(self, mocked_requests_get, mocked_log_info):
+        _app_config = self.get_app_config()
+        mock_german_job = Mock(data=None)
+        url = "%s?%s" % (_app_config["ROUTER_RECEIVE_URL"], mock_german_job.data)
+        worker = ThrottleWorker(_app_config, logger=logging)
+
+        worker.call_router_receive(None, mock_german_job)
+
+        mocked_log_info.assert_called_with(mock_german_job, None, url)
 
     def get_app_config(self):
         config = {  "GEARMAN_SERVER": "0.0.0.0:4730",
