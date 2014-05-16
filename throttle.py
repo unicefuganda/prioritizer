@@ -49,7 +49,6 @@ def throttle_incoming():
     processor = FilterProcessor(high_filters, [])
     priority = processor.execute()
 
-    # print "Priority: [%s]" % priority
     process_request(app.config, request.query_string, priority)
 
     return "Done"
@@ -61,7 +60,6 @@ def add_logger():
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
 
-    app.logger.info('info')
     app.logger.info(type(app.logger))
 
 

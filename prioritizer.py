@@ -95,7 +95,6 @@ def add_logger():
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
 
-    app.logger.info('info')
     app.logger.info(type(app.logger))
 
 
