@@ -23,7 +23,7 @@ Installing pip require packages
 Running tests
 -------------
 
-    $ python -m unittest discover -s api -p 'test*.py'
+    $ python -m unittest discover -p 'test*.py'
 
 Observations
 ------------
