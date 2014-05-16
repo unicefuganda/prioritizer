@@ -11,7 +11,6 @@ class ThrottleWorker(object):
         self.gm_worker.register_task(self.app_config["ROUTER_RECEIVE_TASK_NAME"], self.call_router_receive)
         self.gm_worker.set_client_id(client_id)
 
-
     def call_router_receive(self, gearman_worker, gearman_job):
         url = "%s?%s" % (self.app_config["ROUTER_RECEIVE_URL"], gearman_job.data)
         if self.logger is not None:
