@@ -1,5 +1,3 @@
-import subprocess
-from time import sleep
 from unittest import TestCase
 import requests
 import settings
