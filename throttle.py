@@ -39,9 +39,9 @@ def process_request(app_config, query_string, priority):
 def throttle_incoming():
     whitelist = Whitelist(get_redis_client(), Encoder())
     contact = request.args.get('sender')
-    keyword = request.args.get('keyword')
+    message = request.args.get('message')
 
-    keyword_filter = KeywordFilter(whitelist, keyword, contact)
+    keyword_filter = KeywordFilter(whitelist, message, contact)
     contact_filter = WhitelistContactFilter(whitelist, contact)
 
     high_filters = [keyword_filter, contact_filter]
