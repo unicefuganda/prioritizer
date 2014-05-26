@@ -3,9 +3,10 @@ from flask import Flask, request
 import logging
 from models.encoder import Encoder
 from models.filter_processor import FilterProcessor
+from models.incoming_contact_filter import IncomingContactFilter
 from models.keyword_filter import KeywordFilter
 from models.priority import Priority
-from models.prioritylist import Whitelist
+from models.prioritylist import Whitelist, Blacklist
 from models.throttle_client import ThrottleClient
 from models.whitelist_contact_filter import WhitelistContactFilter
 import redis
@@ -38,15 +39,18 @@ def process_request(app_config, query_string, priority):
 @app.route("/receive", methods=['GET'])
 def throttle_incoming():
     whitelist = Whitelist(get_redis_client(), Encoder())
+    blacklist = Blacklist(get_redis_client(), Encoder())
     contact = request.args.get('sender')
     message = request.args.get('message')
 
     keyword_filter = KeywordFilter(whitelist, message, contact)
     contact_filter = WhitelistContactFilter(whitelist, contact)
+    incoming_contact_filter = IncomingContactFilter(blacklist, contact)
 
     high_filters = [keyword_filter, contact_filter]
+    low_filters = [incoming_contact_filter]
 
-    processor = FilterProcessor(high_filters, [])
+    processor = FilterProcessor(high_filters, low_filters)
     priority = processor.execute()
 
     process_request(app.config, request.query_string, priority)
