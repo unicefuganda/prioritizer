@@ -12,7 +12,7 @@ class ThrottleWorker(object):
         self.gm_worker.set_client_id(client_id)
 
     def call_router_receive(self, gearman_worker, gearman_job):
-        url = "%s?%s" % (self.app_config["ROUTER_RECEIVE_URL"], gearman_job.data)
+        url = "%s?password=%s&%s" % (self.app_config["ROUTER_RECEIVE_URL"], self.app_config["UREPORT_APP_PASSWORD"], gearman_job.data)
         if self.logger is not None:
             self.log_info(gearman_job, gearman_worker, url)
         requests.get(url)

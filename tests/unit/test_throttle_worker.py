@@ -16,7 +16,7 @@ class TestThrottleWorker(TestCase):
         worker = ThrottleWorker(self.get_app_config())
         response = worker.call_router_receive(gearman_worker, gearman_job)
 
-        mocked_requests_get.assert_called_with("http://random.address/router/receive?url-parameters")
+        mocked_requests_get.assert_called_with("http://random.address/router/receive?password=supersecret&url-parameters")
 
         self.assertEqual("ok", response)
 
@@ -41,7 +41,7 @@ class TestThrottleWorker(TestCase):
     def test_that_logging_gets_called(self, mocked_requests_get, mocked_log_info):
         _app_config = self.get_app_config()
         mock_german_job = Mock(data=None)
-        url = "%s?%s" % (_app_config["ROUTER_RECEIVE_URL"], mock_german_job.data)
+        url = "%s?password=%s&%s" % (_app_config["ROUTER_RECEIVE_URL"], _app_config["UREPORT_APP_PASSWORD"], mock_german_job.data)
         worker = ThrottleWorker(_app_config, logger=logging)
 
         worker.call_router_receive(None, mock_german_job)
@@ -51,6 +51,7 @@ class TestThrottleWorker(TestCase):
     def get_app_config(self):
         config = {  "GEARMAN_SERVER": "0.0.0.0:4730",
                     "ROUTER_RECEIVE_TASK_NAME": "call_router_receive",
-                    "ROUTER_RECEIVE_URL": "http://random.address/router/receive"
+                    "ROUTER_RECEIVE_URL": "http://random.address/router/receive",
+                    "UREPORT_APP_PASSWORD": "supersecret"
                 }
         return config
